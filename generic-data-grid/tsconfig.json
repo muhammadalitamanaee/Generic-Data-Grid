@@ -20,10 +20,10 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@types": ["./src/types"],
-      "@components": ["./src/components"],
-      "@hooks": ["./src/hooks"],
-      "@lib": ["./src/lib"],
+      "@/types/*": ["./src/types/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/lib/*": ["./src/lib/*"]
     }
   },
   "include": [
