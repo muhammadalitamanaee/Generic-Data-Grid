@@ -7,3 +7,10 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+/**
+ * Formats a date into the Jalali calendar format (Persian calendar).
+ */
+export const formatJalali = (date: Date | string) => {
+  return new Intl.DateTimeFormat("fa-IR").format(new Date(date));
+};
