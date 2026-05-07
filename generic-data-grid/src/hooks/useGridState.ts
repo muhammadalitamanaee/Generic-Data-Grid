@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { GridState } from "@/types/grid";
 
 export function useGridState() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const currentState: GridState = {
@@ -14,22 +15,43 @@ export function useGridState() {
       ? [
           {
             key: searchParams.get("sort")?.split(":")[0] || "",
-            order: (searchParams.get("sort")?.split(":")[1] as unknown) || "asc",
+            order: (searchParams.get("sort")?.split(":")[1] as any) || "asc",
           },
         ]
       : [],
-    filters: [], // Logic to parse filters from URL can be added here
+    // Parsing filters from URL so they persist on refresh
+    filters: searchParams.get("search")
+      ? [{ key: "name", value: searchParams.get("search")! }]
+      : [],
   };
 
   const updateState = (newState: Partial<GridState>) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    if (newState.page) params.set("page", newState.page.toString());
-    if (newState.pageSize) params.set("pageSize", newState.pageSize.toString());
-    if (newState.sort)
-      params.set("sort", `${newState.sort[0].key}:${newState.sort[0].order}`);
+    if (newState.page !== undefined)
+      params.set("page", newState.page.toString());
+    if (newState.pageSize !== undefined)
+      params.set("pageSize", newState.pageSize.toString());
 
-    router.push(`?${params.toString()}`, { scroll: false });
+    if (newState.sort !== undefined) {
+      if (newState.sort.length > 0) {
+        params.set("sort", `${newState.sort[0].key}:${newState.sort[0].order}`);
+      } else {
+        params.delete("sort");
+      }
+    }
+
+    if (newState.filters !== undefined) {
+      const nameFilter = newState.filters.find((f) => f.key === "name");
+      if (nameFilter?.value) {
+        params.set("search", String(nameFilter.value));
+      } else {
+        params.delete("search");
+      }
+    }
+
+    // This triggers the transition in the wrapper
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return { currentState, updateState };

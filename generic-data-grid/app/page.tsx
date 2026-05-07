@@ -1,16 +1,28 @@
 import { fetchGridData } from "@/lib/mockApi";
-import ClientGridWrapper from "@/components/grid/Clientgridwrapper";
+import ClientGridWrapper from "@/src/components/grid/Clientgridwrapper";
 
-export default async function Home({ searchParams }: { searchParams: any }) {
-  // Initial server-side fetch[cite: 1]
+// 1. Change the props type to Promise
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function Home({ searchParams }: PageProps) {
+  // 2. Await the searchParams before using them
+  const resolvedParams = await searchParams;
+
+  const page = Number(resolvedParams.page) || 1;
+  const sortParam =
+    typeof resolvedParams.sort === "string" ? resolvedParams.sort : "";
+  console.log("page from the params ", page);
+  // Initial server-side fetch
   const initialData = await fetchGridData({
-    page: Number(searchParams.page) || 1,
+    page: page,
     pageSize: 10,
-    sort: searchParams.sort
+    sort: sortParam
       ? [
           {
-            key: searchParams.sort.split(":")[0],
-            order: searchParams.sort.split(":")[1],
+            key: sortParam.split(":")[0],
+            order: sortParam.split(":")[1] as "asc" | "desc",
           },
         ]
       : [],
