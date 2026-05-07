@@ -1,8 +1,8 @@
 "use client";
 
-import { ColumnConfig, GridState, PaginatedResponse } from "@/types/grid";
+import { ColumnConfig, GridState } from "@/types/grid";
 import { CellRenderer } from "./CellRenderer";
-import { ChevronUp, ChevronDown, Loader2 } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DataGridProps<T> {
@@ -31,11 +31,20 @@ export function DataGrid<T>({
 
     onStateChange({ sort: newOrder ? [{ key, order: newOrder }] : [] });
   };
+
+  const getSortIcon = (key: string) => {
+    const sort = state.sort.find((s) => s.key === key);
+    if (!sort) return <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400" />;
+    if (sort.order === "asc")
+      return <ChevronUp className="w-3.5 h-3.5 text-blue-600" />;
+    return <ChevronDown className="w-3.5 h-3.5 text-blue-600" />;
+  };
+
   const visibleColumns = columns.filter((c) => c.visible !== false);
+
   return (
     <div className="w-full space-y-4 border rounded-lg bg-white shadow-sm overflow-hidden">
       <div className="relative overflow-x-auto">
-        {/* 2. Loading Overlay is now outside the table */}
         {loading && (
           <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 backdrop-blur-[1px]">
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -49,14 +58,14 @@ export function DataGrid<T>({
                 <th
                   key={col.key as string}
                   className={cn(
-                    "px-4 py-3 font-semibold text-slate-700",
+                    "px-4 py-3 font-semibold text-slate-700 select-none",
                     col.sortable && "cursor-pointer hover:bg-slate-100",
                   )}
                   onClick={() => col.sortable && handleSort(col.key as string)}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     {col.title}
-                    {/* ... sort icons ... */}
+                    {col.sortable && getSortIcon(col.key as string)}
                   </div>
                 </th>
               ))}
@@ -77,7 +86,6 @@ export function DataGrid<T>({
                 </tr>
               ))
             ) : (
-              /* 3. Empty State uses a valid table row and colSpan */
               <tr>
                 <td
                   colSpan={visibleColumns.length}
@@ -91,7 +99,6 @@ export function DataGrid<T>({
         </table>
       </div>
 
-      {/* Pagination component would go here */}
       <div className="p-4 border-t bg-slate-50 flex justify-between items-center">
         <span className="text-xs text-slate-500">مجموع رکوردها: {total}</span>
         <div className="flex gap-2">

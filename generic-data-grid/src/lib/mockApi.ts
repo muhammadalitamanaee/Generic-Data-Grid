@@ -84,9 +84,36 @@ export async function fetchGridData(
     filteredData.sort((a, b) => {
       const valA = a[key as keyof MockRecord];
       const valB = b[key as keyof MockRecord];
-      if (valA === valB) return 0;
-      const cmp = valA > valB ? 1 : -1;
-      return order === "asc" ? cmp : -cmp;
+
+      // Numbers: compare as numbers
+      if (typeof valA === "number" && typeof valB === "number") {
+        return order === "asc" ? valA - valB : valB - valA;
+      }
+
+      // Booleans: true > false
+      if (typeof valA === "boolean" && typeof valB === "boolean") {
+        const cmp = valA === valB ? 0 : valA ? 1 : -1;
+        return order === "asc" ? cmp : -cmp;
+      }
+
+      // Dates: parse and compare as timestamps
+      if (
+        typeof valA === "string" &&
+        typeof valB === "string" &&
+        !isNaN(Date.parse(valA)) &&
+        !isNaN(Date.parse(valB))
+      ) {
+        const cmp = Date.parse(valA) - Date.parse(valB);
+        return order === "asc" ? cmp : -cmp;
+      }
+
+      // Strings: locale-aware comparison (handles Persian/Arabic too)
+      if (typeof valA === "string" && typeof valB === "string") {
+        const cmp = valA.localeCompare(valB, "fa");
+        return order === "asc" ? cmp : -cmp;
+      }
+
+      return 0;
     });
   }
 
