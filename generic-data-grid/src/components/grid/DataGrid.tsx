@@ -117,21 +117,31 @@ export function DataGrid<T>({
           </select>
           <span>رکورد از {total}</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <button
             disabled={state.page === 1}
             onClick={() => onStateChange({ page: state.page - 1 })}
-            className="px-3 py-1 border rounded bg-white disabled:opacity-50"
+            className={cn(
+              "px-4 py-1.5 rounded-md border text-sm font-medium transition-colors",
+              state.page === 1
+                ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                : "border-blue-500 bg-blue-500 text-white hover:bg-blue-600 hover:border-blue-600 cursor-pointer",
+            )}
           >
             قبلی
           </button>
-          <span className="px-3 py-1 text-sm">
+          <span className="px-3 py-1.5 text-sm text-slate-600 font-medium">
             صفحه {state.page} از {Math.ceil(total / state.pageSize)}
           </span>
           <button
             disabled={state.page * state.pageSize >= total}
             onClick={() => onStateChange({ page: state.page + 1 })}
-            className="px-3 py-1 border rounded bg-white disabled:opacity-50"
+            className={cn(
+              "px-4 py-1.5 rounded-md border text-sm font-medium transition-colors",
+              state.page * state.pageSize >= total
+                ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                : "border-blue-500 bg-blue-500 text-white hover:bg-blue-600 hover:border-blue-600 cursor-pointer",
+            )}
           >
             بعدی
           </button>
