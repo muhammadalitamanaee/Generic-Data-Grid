@@ -60,6 +60,16 @@ const columns: ColumnConfig<Record<string, unknown>>[] = [
       { label: "مدیر", value: "manager" },
     ],
   },
+  // {
+  //   key: 'name',
+  //   title: 'نام',
+  //   type: 'custom',
+  //   render: (value, record) => (
+  //     <span className="font-bold text-blue-600">{value}</span>
+  //   ),
+  // }
+
+  // custom column for rendering based on mock data
 ];
 
 export default function ClientGridWrapper({
