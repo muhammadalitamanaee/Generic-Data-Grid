@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 export type ColumnType = "text" | "number" | "date" | "boolean" | "custom";
 
-// NEW: describes what kind of filter UI to render for this column
+// describes what kind of filter UI to render for this column
 export type FilterType = "text" | "number" | "date" | "select" | "boolean";
 
 export interface SelectOption {
@@ -16,8 +16,8 @@ export interface ColumnConfig<T> {
   type: ColumnType;
   sortable?: boolean;
   filterable?: boolean;
-  filterType?: FilterType; // NEW: which filter UI to show
-  filterOptions?: SelectOption[]; // NEW: used when filterType === "select"
+  filterType?: FilterType; //  which filter UI to show
+  filterOptions?: SelectOption[]; //  used when filterType === "select"
   render?: (value: unknown, record: T) => ReactNode;
   visible?: boolean;
 }

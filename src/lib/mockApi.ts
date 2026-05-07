@@ -28,7 +28,7 @@ export async function fetchGridData(
 
   let filteredData = [...MOCK_DATA];
 
-  // ── Server-side Filtering ────────────────────────────────────────────────
+  // Server-side Filtering
   state.filters.forEach((f) => {
     // Skip empty values (but allow boolean false and number 0)
     if (f.value === "" || f.value === undefined || f.value === null) return;
@@ -44,21 +44,20 @@ export async function fetchGridData(
             .includes(String(f.value).toLowerCase());
 
         case "equals":
-          // Handles boolean, number, select, date equality
           if (typeof f.value === "boolean") {
             return itemValue === f.value;
           }
           if (typeof f.value === "number") {
             return Number(itemValue) === f.value;
           }
-          // Date: compare "YYYY-MM-DD" prefix
+
           if (
             typeof itemValue === "string" &&
             String(f.value).match(/^\d{4}-\d{2}-\d{2}$/)
           ) {
             return itemValue.startsWith(String(f.value));
           }
-          // Select / string equality
+
           return (
             String(itemValue).toLowerCase() === String(f.value).toLowerCase()
           );
@@ -70,7 +69,7 @@ export async function fetchGridData(
           return Number(itemValue) < Number(f.value);
 
         default:
-          // Fallback to contains for text
+          // Fallback to text
           return String(itemValue)
             .toLowerCase()
             .includes(String(f.value).toLowerCase());
@@ -78,14 +77,14 @@ export async function fetchGridData(
     });
   });
 
-  // ── Server-side Sorting ──────────────────────────────────────────────────
+  // Server-side Sorting
   if (state.sort.length > 0) {
     const { key, order } = state.sort[0];
     filteredData.sort((a, b) => {
       const valA = a[key as keyof MockRecord];
       const valB = b[key as keyof MockRecord];
 
-      // Numbers: compare as numbers
+      // Numbers: compare as numbers beacuse in js for example : "9">"17"
       if (typeof valA === "number" && typeof valB === "number") {
         return order === "asc" ? valA - valB : valB - valA;
       }
@@ -117,7 +116,7 @@ export async function fetchGridData(
     });
   }
 
-  // ── Server-side Pagination ───────────────────────────────────────────────
+  // Server-side Pagination 
   const start = (state.page - 1) * state.pageSize;
   const paginatedData = filteredData.slice(start, start + state.pageSize);
 

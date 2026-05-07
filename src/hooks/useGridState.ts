@@ -8,6 +8,7 @@ import { GridFilter, GridState } from "@/types/grid";
 // e.g. filter_name=Ali&filterop_name=contains
 //      filter_age=25&filterop_age=equals
 //      filter_isActive=true&filterop_isActive=equals
+// single source of truth is url ba tavajoh be pdf ke dadid
 
 export function useGridState() {
   const router = useRouter();

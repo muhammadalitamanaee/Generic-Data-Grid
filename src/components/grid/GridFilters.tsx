@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ColumnConfig, GridFilter, SelectOption } from "@/types/grid";
 import { Input } from "../ui/Input";
-import { cn } from "@/lib/utils";
 
 interface GridFiltersProps<T> {
   columns: ColumnConfig<T>[];
@@ -128,7 +127,6 @@ export function GridFilters<T>({
   );
 }
 
-// ─── Sub-component: renders the right input per filterType ───────────────────
 
 interface FilterInputProps {
   filterType: "text" | "number" | "date" | "select" | "boolean";
@@ -136,6 +134,9 @@ interface FilterInputProps {
   options?: SelectOption[];
   onChange: (value: string) => void;
 }
+
+
+// renders the right input per filterType 
 
 function FilterInput({
   filterType,

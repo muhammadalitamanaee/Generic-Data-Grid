@@ -97,7 +97,7 @@ export default function ClientGridWrapper({
       />
       <DataGrid
         columns={columns}
-        data={data}
+        data={data as Record<string, unknown>[]}
         total={total}
         loading={isPending}
         state={currentState}

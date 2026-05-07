@@ -1,13 +1,12 @@
 import { fetchGridData } from "@/lib/mockApi";
 import ClientGridWrapper from "@/src/components/grid/Clientgridwrapper";
 
-// 1. Change the props type to Promise
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function Home({ searchParams }: PageProps) {
-  // 2. Await the searchParams before using them
+  // we can use the hooks of the nextjs if it was a client side (useSearchParams) 
   const resolvedParams = await searchParams;
 
   const page = Number(resolvedParams.page) || 1;

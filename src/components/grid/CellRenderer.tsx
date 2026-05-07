@@ -11,10 +11,9 @@ interface Props<T> {
 export function CellRenderer<T>({ column, record }: Props<T>) {
   const value = record[column.key as keyof T];
 
-  // 1. Custom Renderer Support
+  // for Custom Renderer Support
   if (column.render) return column.render(value, record);
 
-  // 2. Type-based Rendering
   switch (column.type) {
     case "date":
       return <span>{value ? formatJalali(value as string) : "-"}</span>;
