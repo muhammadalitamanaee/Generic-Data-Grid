@@ -19,12 +19,14 @@ export async function fetchGridData(
 
   // 2. Server-side Filtering[cite: 1]
   state.filters.forEach((f) => {
-    if (f.value !== "" && f.value !== undefined) {
-      filteredData = filteredData.filter((item) =>
-        String(item[f.key as keyof typeof item])
-          .toLowerCase()
-          .includes(String(f.value).toLowerCase()),
-      );
+    if (f.value) {
+      filteredData = filteredData.filter((item) => {
+        const itemValue = String(
+          item[f.key as keyof typeof item],
+        ).toLowerCase();
+        const filterValue = String(f.value).toLowerCase();
+        return itemValue.includes(filterValue);
+      });
     }
   });
 
