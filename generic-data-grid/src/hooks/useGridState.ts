@@ -2,23 +2,41 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { GridState } from "@/types/grid";
+import { GridFilter, GridState } from "@/types/grid";
+
+// Each filter is stored in the URL as:  filter_<key>=<value>&filterop_<key>=<operator>
+// e.g. filter_name=Ali&filterop_name=contains
+//      filter_age=25&filterop_age=equals
+//      filter_isActive=true&filterop_isActive=equals
 
 export function useGridState() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  /**
-   * 1. Stabilize the current state object.
-   * By using useMemo, the 'currentState' object reference only changes when
-   * the actual URL search parameters change in the browser.
-   */
   const currentState: GridState = useMemo(() => {
     const page = Number(searchParams.get("page")) || 1;
     const pageSize = Number(searchParams.get("pageSize")) || 10;
     const sortParam = searchParams.get("sort");
-    const searchParam = searchParams.get("search");
+
+    // Reconstruct filters array from all filter_* params
+    const filters: GridFilter[] = [];
+    searchParams.forEach((value, paramKey) => {
+      if (paramKey.startsWith("filter_")) {
+        const key = paramKey.replace("filter_", "");
+        const operator =
+          (searchParams.get(`filterop_${key}`) as GridFilter["operator"]) ||
+          "contains";
+
+        // Coerce value to the right type
+        let coerced: string | number | boolean = value;
+        if (value === "true") coerced = true;
+        else if (value === "false") coerced = false;
+        else if (!isNaN(Number(value)) && value !== "") coerced = Number(value);
+
+        filters.push({ key, value: coerced, operator });
+      }
+    });
 
     return {
       page,
@@ -31,25 +49,22 @@ export function useGridState() {
             },
           ]
         : [],
-      filters: searchParam ? [{ key: "name", value: searchParam }] : [],
+      filters,
     };
   }, [searchParams]);
 
-  /**
-   * 2. Stabilize the update function.
-   * Wrapping this in useCallback prevents components like 'GridFilters'
-   * from triggering their internal effects on every parent render.
-   */
   const updateState = useCallback(
     (newState: Partial<GridState>) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      // Update Pagination
       if (newState.page !== undefined) {
         params.set("page", newState.page.toString());
       }
 
-      // Update Sorting
+      if (newState.pageSize !== undefined) {
+        params.set("pageSize", newState.pageSize.toString());
+      }
+
       if (newState.sort !== undefined) {
         if (newState.sort.length > 0) {
           params.set(
@@ -61,27 +76,30 @@ export function useGridState() {
         }
       }
 
-      // Update Filtering (Mapping 'name' key to 'search' URL param)
       if (newState.filters !== undefined) {
-        const nameFilter = newState.filters.find((f) => f.key === "name");
-        if (nameFilter?.value) {
-          params.set("search", String(nameFilter.value));
-        } else {
-          params.delete("search");
-        }
+        // Clear all existing filter_* and filterop_* params first
+        const keysToDelete: string[] = [];
+        params.forEach((_, k) => {
+          if (k.startsWith("filter_") || k.startsWith("filterop_")) {
+            keysToDelete.push(k);
+          }
+        });
+        keysToDelete.forEach((k) => params.delete(k));
+
+        // Write new filters
+        newState.filters.forEach((f) => {
+          params.set(`filter_${f.key}`, String(f.value));
+          if (f.operator) {
+            params.set(`filterop_${f.key}`, f.operator);
+          }
+        });
+
+        // Any filter change should reset to page 1
+        params.set("page", "1");
       }
 
       const newQueryString = params.toString();
-      const currentQueryString = searchParams.toString();
-
-      /**
-       * 3. THE CIRCUIT BREAKER:
-       * We compare the generated string with the current one.
-       * Only push to the router if the URL parameters have actually changed.
-       * This prevents the infinite loop where searchParams trigger an effect
-       * which triggers a push, which triggers searchParams...
-       */
-      if (newQueryString !== currentQueryString) {
+      if (newQueryString !== searchParams.toString()) {
         router.push(`${pathname}?${newQueryString}`, { scroll: false });
       }
     },

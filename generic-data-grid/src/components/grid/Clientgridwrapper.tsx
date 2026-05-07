@@ -1,31 +1,78 @@
 "use client";
 
-import { useState, useEffect, useTransition, useCallback } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { DataGrid } from "./DataGrid";
 import { useGridState } from "@/hooks/useGridState";
 import { fetchGridData } from "@/lib/mockApi";
 import { GridFilters } from "./GridFilters";
+import { ColumnConfig, GridFilter } from "@/types/grid";
+
+// Define columns OUTSIDE the component so they're stable references
+const columns: ColumnConfig<Record<string, unknown>>[] = [
+  {
+    key: "id",
+    title: "شناسه",
+    type: "number",
+    sortable: true,
+    // No filter on ID — usually not useful
+  },
+  {
+    key: "name",
+    title: "نام کاربر",
+    type: "text",
+    sortable: true,
+    filterable: true,
+    filterType: "text",
+  },
+  {
+    key: "age",
+    title: "سن",
+    type: "number",
+    sortable: true,
+    filterable: true,
+    filterType: "number",
+  },
+  {
+    key: "createdAt",
+    title: "تاریخ ایجاد",
+    type: "date",
+    sortable: true,
+    filterable: true,
+    filterType: "date",
+  },
+  {
+    key: "isActive",
+    title: "وضعیت",
+    type: "boolean",
+    filterable: true,
+    filterType: "boolean",
+  },
+  {
+    key: "role",
+    title: "نقش",
+    type: "text",
+    sortable: true,
+    filterable: true,
+    filterType: "select",
+    filterOptions: [
+      { label: "ادمین", value: "admin" },
+      { label: "کاربر", value: "user" },
+      { label: "مدیر", value: "manager" },
+    ],
+  },
+];
 
 export default function ClientGridWrapper({
   initialData,
 }: {
-  initialData: any;
+  initialData: { data: unknown[]; total: number };
 }) {
   const { currentState, updateState } = useGridState();
   const [isPending, startTransition] = useTransition();
   const [data, setData] = useState(initialData.data);
   const [total, setTotal] = useState(initialData.total);
 
-  const columns = [
-    { key: "id", title: "شناسه", type: "number", sortable: true },
-    { key: "name", title: "نام کاربر", type: "text", sortable: true },
-    { key: "age", title: "سن", type: "number", sortable: true },
-    { key: "createdAt", title: "تاریخ ایجاد", type: "date", sortable: true },
-    { key: "isActive", title: "وضعیت", type: "boolean" },
-  ];
-
   useEffect(() => {
-    // When currentState (URL) changes, fetch new data inside the transition
     startTransition(async () => {
       try {
         const result = await fetchGridData(currentState);
@@ -35,24 +82,19 @@ export default function ClientGridWrapper({
         console.error("Failed to fetch grid data:", error);
       }
     });
-  }, [JSON.stringify(currentState)]); // Using stringify to track deep changes in sort/filters arrays
+  }, [JSON.stringify(currentState)]);
 
-  const handleSearch = useCallback(
-    (value: string) => {
-      updateState({
-        page: 1, // Reset to page 1 on new search
-        filters: value ? [{ key: "name", value }] : [],
-      });
-    },
-    [updateState],
-  );
+  const handleFiltersChange = (filters: GridFilter[]) => {
+    updateState({ filters });
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center px-1">
-        {/* Optional: Add an Export button here to meet requirement 4. bonus */}
-      </div>
-      <GridFilters onSearch={handleSearch} />
+      <GridFilters
+        columns={columns}
+        currentFilters={currentState.filters}
+        onFiltersChange={handleFiltersChange}
+      />
       <DataGrid
         columns={columns}
         data={data}

@@ -2,14 +2,24 @@ import { ReactNode } from "react";
 
 export type ColumnType = "text" | "number" | "date" | "boolean" | "custom";
 
+// NEW: describes what kind of filter UI to render for this column
+export type FilterType = "text" | "number" | "date" | "select" | "boolean";
+
+export interface SelectOption {
+  label: string;
+  value: string | number | boolean;
+}
+
 export interface ColumnConfig<T> {
   key: keyof T | string;
   title: string;
   type: ColumnType;
-  sortable?: boolean; //
-  filterable?: boolean; //
-  render?: (value: unknown, record: T) => ReactNode; // Custom renderer
-  visible?: boolean; // Bonus: Column Visibility Toggle[cite: 1]
+  sortable?: boolean;
+  filterable?: boolean;
+  filterType?: FilterType; // NEW: which filter UI to show
+  filterOptions?: SelectOption[]; // NEW: used when filterType === "select"
+  render?: (value: unknown, record: T) => ReactNode;
+  visible?: boolean;
 }
 
 export type SortOrder = "asc" | "desc" | null;
@@ -34,5 +44,5 @@ export interface GridState {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  total: number; // For server-side pagination[cite: 1]
+  total: number;
 }
