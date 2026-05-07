@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback } from "react";
 import { DataGrid } from "./DataGrid";
 import { useGridState } from "@/hooks/useGridState";
 import { fetchGridData } from "@/lib/mockApi";
+import { GridFilters } from "./GridFilters";
 
 export default function ClientGridWrapper({
   initialData,
@@ -36,12 +37,22 @@ export default function ClientGridWrapper({
     });
   }, [JSON.stringify(currentState)]); // Using stringify to track deep changes in sort/filters arrays
 
+  const handleSearch = useCallback(
+    (value: string) => {
+      updateState({
+        page: 1, // Reset to page 1 on new search
+        filters: value ? [{ key: "name", value }] : [],
+      });
+    },
+    [updateState],
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-1">
         {/* Optional: Add an Export button here to meet requirement 4. bonus */}
       </div>
-
+      <GridFilters onSearch={handleSearch} />
       <DataGrid
         columns={columns}
         data={data}
