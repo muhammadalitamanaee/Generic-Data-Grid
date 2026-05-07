@@ -99,8 +99,24 @@ export function DataGrid<T>({
         </table>
       </div>
 
-      <div className="p-4 border-t bg-slate-50 flex justify-between items-center">
-        <span className="text-xs text-slate-500">مجموع رکوردها: {total}</span>
+      <div className="p-4 border-t bg-slate-50 flex justify-between items-center flex-wrap gap-3">
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <span>نمایش</span>
+          <select
+            value={state.pageSize}
+            onChange={(e) =>
+              onStateChange({ pageSize: Number(e.target.value), page: 1 })
+            }
+            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+          >
+            {[5, 10, 20, 50].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+          <span>رکورد از {total}</span>
+        </div>
         <div className="flex gap-2">
           <button
             disabled={state.page === 1}
@@ -109,7 +125,9 @@ export function DataGrid<T>({
           >
             قبلی
           </button>
-          <span className="px-3 py-1">صفحه {state.page}</span>
+          <span className="px-3 py-1 text-sm">
+            صفحه {state.page} از {Math.ceil(total / state.pageSize)}
+          </span>
           <button
             disabled={state.page * state.pageSize >= total}
             onClick={() => onStateChange({ page: state.page + 1 })}

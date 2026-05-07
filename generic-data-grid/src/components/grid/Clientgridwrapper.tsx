@@ -20,7 +20,7 @@ const columns: ColumnConfig<Record<string, unknown>>[] = [
     key: "name",
     title: "نام کاربر",
     type: "text",
-    sortable: true,
+    sortable: false,
     filterable: true,
     filterType: "text",
   },
@@ -51,7 +51,7 @@ const columns: ColumnConfig<Record<string, unknown>>[] = [
     key: "role",
     title: "نقش",
     type: "text",
-    sortable: true,
+    sortable: false,
     filterable: true,
     filterType: "select",
     filterOptions: [
